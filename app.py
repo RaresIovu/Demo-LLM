@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, Response
+from service import get_knowledge
 
 app = Flask(__name__, template_folder="templates")
 
@@ -14,10 +15,10 @@ def get_produse():
 
 @app.route('/produs/<int:produs_id>', methods=['GET'])
 def get_produs(produs_id):
-    rezultat = [p for p in produse if p['id'] == produs_id]
-    if len(rezultat) == 0:
-        return jsonify({"eroare": "Produsul nu a fost găsit"}), 404
-    return jsonify(rezultat[0])
+    #rezultat = [p for p in produse if p['id'] == produs_id]
+    #if len(rezultat) == 0:
+    #    return jsonify({"eroare": "Produsul nu a fost găsit"}), 404
+    return jsonify(get_knowledge(produs_id))
 
 @app.route('/delete_produs/<int:produs_id>', methods=['DELETE'])
 def delete_produs(produs_id):

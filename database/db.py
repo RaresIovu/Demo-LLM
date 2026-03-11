@@ -5,3 +5,4 @@ def get_connection():
     con = sqlite3.connect(DB_PATH)
     con.text_factory = str
     return con
+
