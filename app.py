@@ -7,7 +7,6 @@ produse = [
     {"id": 1, "nume": "Laptop", "pret": 3500},
     {"id": 2, "nume": "Mouse", "pret": 150}
 ]
-next_id = 3
 
 @app.route('/produse', methods=['GET']) 
 def get_produse():
