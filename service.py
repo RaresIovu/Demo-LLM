@@ -8,6 +8,8 @@ def get_knowledge(id):
     (id,)
     )
     row = cur.fetchone()
+    if not row:
+        return None
     con.close()
     data = {
         "id":row[0],
@@ -19,10 +21,18 @@ def get_knowledge(id):
 def add_knowledge(name, price):
     con = get_connection()
     cur = con.cursor()
+
     cur.execute(
-    "INSERT INTO products (name, price) VALUES (LOWER(?), LOWER(?))",
+    "SELECT 1 FROM products WHERE LOWER(name) = LOWER(?)",
+    (name,)
+    )
+    if cur.fetchone():
+        return {"Status": "Duplicate"}
+    cur.execute(
+    "INSERT INTO products (name, price) VALUES (?, ?)",
     (name, price)
     )
     con.commit()
     con.close()
+    return {"Status": "Success"}
 
