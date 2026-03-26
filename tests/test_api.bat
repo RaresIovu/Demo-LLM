@@ -5,7 +5,7 @@ echo Trimitem datele catre server...
 
 curl -X POST http://127.0.0.1:5000/add_produs/ ^
      -H "Content-Type: application/json" ^
-     -d "{\"name\":\"Printer\", \"price\":200}"
+     -d "{\"name\":\"Salau\", \"price\":200}"
 
 echo.
 echo Operatiune finalizata.
