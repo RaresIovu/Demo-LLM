@@ -1,6 +1,26 @@
 from database.db import get_connection
 from exceptions import DuplicateException
 
+def get_allKnowledge():
+    with get_connection() as con:
+        cur = con.cursor()
+        cur.execute(
+            "SELECT * FROM products"
+        )
+        rows = cur.fetchall()
+        if not rows:
+            return None
+        
+        content = []
+        for row in rows:
+            content.append({
+                "id": row[0],
+                "name":row[1],
+                "price":row[2]
+            })
+
+        return content
+        
 def get_knowledge(id):
     con = get_connection()
     cur = con.cursor()
