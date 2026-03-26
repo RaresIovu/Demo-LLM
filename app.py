@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, Response
+from service import get_knowledge, add_knowledge
 
 app = Flask(__name__, template_folder="templates")
 
@@ -14,31 +15,20 @@ def get_produse():
 
 @app.route('/produs/<int:produs_id>', methods=['GET'])
 def get_produs(produs_id):
-    rezultat = [p for p in produse if p['id'] == produs_id]
-    if len(rezultat) == 0:
-        return jsonify({"eroare": "Produsul nu a fost găsit"}), 404
-    return jsonify(rezultat[0])
-
-@app.route('/delete_produs/<int:produs_id>', methods=['DELETE'])
-def delete_produs(produs_id):
-    rezultat = next((p for p in produse if p['id'] == produs_id), None)
-    if not rezultat:
-        return jsonify({"eroare": "Produsul nu a fost găsit"}), 404
-    produse.remove(rezultat)
-    return jsonify({"message": "Produsul a fost sters"}), 200
+    content = get_knowledge(produs_id)
+    if not content:
+        return jsonify({"eroare": "Produsul nu a fost gasit"})
+    return jsonify(content)
+    
 
 @app.route('/add_produs/', methods=['POST'])
 def add_produs():
-    if(any(p['nume'].lower() == request.json['nume'].lower() for p in produse)):
-        return jsonify({"eroare": "Acest produs exista deja in lista"}), 409
-    nou_produs = {
-        "id": len(produse),
-        "nume": request.json['nume'],
-        "pret": request.json['pret']
-    }
-
-    produse.append(nou_produs)
-    return jsonify(nou_produs), 201
+    name = request.json['name']
+    price = request.json['price']
+    code = add_knowledge(name, price)
+    if code['Status'] == 'Duplicate':
+        return jsonify({"eroare": "Produsul deja exista in lista"}), 409
+    return jsonify("Produsul a fost adaugat cu succes"), 201
 
 
 if __name__ == "__main__":
