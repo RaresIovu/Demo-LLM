@@ -1,4 +1,5 @@
 from database.db import get_connection
+from exceptions import DuplicateException
 
 def get_knowledge(id):
     con = get_connection()
@@ -27,12 +28,18 @@ def add_knowledge(name, price):
     (name,)
     )
     if cur.fetchone():
-        return {"Status": "Duplicate"}
+        raise DuplicateException("Product already exists")
     cur.execute(
     "INSERT INTO products (name, price) VALUES (?, ?)",
     (name, price)
     )
+    new_id = cur.lastrowid
     con.commit()
     con.close()
-    return {"Status": "Success"}
+    item = {
+        "id": new_id,
+        "name": name,
+        "price": price
+    }
+    return item
 

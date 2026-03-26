@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, Response
 from service import get_knowledge, add_knowledge
+from exceptions import DuplicateException
 
 app = Flask(__name__, template_folder="templates")
 
@@ -23,13 +24,19 @@ def get_produs(produs_id):
 
 @app.route('/add_produs/', methods=['POST'])
 def add_produs():
-    name = request.json['name']
-    price = request.json['price']
-    code = add_knowledge(name, price)
-    if code['Status'] == 'Duplicate':
-        return jsonify({"eroare": "Produsul deja exista in lista"}), 409
-    return jsonify("Produsul a fost adaugat cu succes"), 201
-
+    data = request.get_json()
+    name = data.get('name')
+    price = data.get('price')
+    if not name or not price:
+        return jsonify({"eroare": "Lipsesc date (nume sau pret)"}), 400
+    try:
+        item = add_knowledge(name, price)
+        return jsonify({
+            "message": "Produsul a fost adăugat",
+            "data": item
+        }), 201
+    except DuplicateException as e:
+        return jsonify({"eroare": str(e)}), 409
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
