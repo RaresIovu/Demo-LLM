@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% set pagina = 'produse' %}
+
+{% block titlu %}Toate produsele{% endblock %}
+
+{% block continut %}
+<h1>
+    <span class="badge badge-get">GET</span>
+    /produse — Toate produsele
+</h1>
+
+<div class="card">
+    <p style="color:#555; margin-bottom:1rem;">
+        Apasa butonul pentru a trimite o cerere <strong>GET</strong> catre
+        <code>/produse</code> si a vedea toate produsele din baza de date.
+    </p>
+    <button class="btn-primar" onclick="incarcaProduse()">Incarca produse</button>
+
+    <div id="mesaj" class="mesaj"></div>
+
+    <!-- Tabelul este ascuns pana soseste raspunsul -->
+    <div id="container-tabel" style="display:none; margin-top:1.2rem;">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nume</th>
+                    <th>Pret (RON)</th>
+                </tr>
+            </thead>
+            <tbody id="corp-tabel"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+async function incarcaProduse() {
+    const mesajEl        = document.getElementById('mesaj');
+    const containerTabel = document.getElementById('container-tabel');
+    const corpTabel      = document.getElementById('corp-tabel');
+
+    // Resetam starea anterioara
+    mesajEl.style.display        = 'none';
+    mesajEl.className            = 'mesaj';
+    containerTabel.style.display = 'none';
+    corpTabel.innerHTML          = '';
+
+    try {
+        // Cerere GET catre endpoint-ul API
+        const raspuns = await fetch('/produse');
+        const date    = await raspuns.json();
+
+        if (!raspuns.ok) {
+            // Serverul a returnat o eroare (ex: 500)
+            afiseazaMesaj('eroare', date.eroare || 'Eroare necunoscuta de la server.');
+            return;
+        }
+
+        if (date.length === 0) {
+            afiseazaMesaj('eroare', 'Nu exista produse in baza de date.');
+            return;
+        }
+
+        // Construim randurile tabelului
+        date.forEach(produs => {
+            const rand = document.createElement('tr');
+            rand.innerHTML = `
+                <td>${produs.id}</td>
+                <td>${produs.name}</td>
+                <td>${produs.price}</td>
+            `;
+            corpTabel.appendChild(rand);
+        });
+
+        containerTabel.style.display = 'block';
+        afiseazaMesaj('succes', `${date.length} produs(e) incarcate cu succes.`);
+
+    } catch (err) {
+        // Eroare de retea (serverul nu raspunde)
+        afiseazaMesaj('eroare', 'Nu s-a putut conecta la server. Verifica daca aplicatia ruleaza.');
+    }
+}
+
+function afiseazaMesaj(tip, text) {
+    const el      = document.getElementById('mesaj');
+    el.textContent  = text;
+    el.className    = `mesaj ${tip}`;
+    el.style.display = 'block';
+}
+</script>
+{% endblock %}
