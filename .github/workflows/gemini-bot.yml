@@ -38,13 +38,14 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Configure the CLI with your key
-          gemini config set api_key "$GEMINI_API_KEY"
+          # Use npx to avoid installation overhead
+          # Added --max-turns=2 to prevent the AI from looping and hitting quotas
+          npx @google/gemini-cli "I need to fix an issue. 
+          Title: ${{ github.event.issue.title }}
+          Body: ${{ github.event.issue.body }}
           
-          # The "Magic" Command:
-          # Tells Gemini to read the issue, fix the code, and push a new branch.
-          gemini "Issue Title: ${{ github.event.issue.title }}
-          Issue Body: ${{ github.event.issue.body }}
-          
-          Task: Analyze the current code in this repo and create a new git branch 
-          with a fix for this issue. Commit the changes and push the branch to origin." --approval-mode=yolo
+          STRICT RULES:
+          1. Create a new branch.
+          2. Create/modify the necessary files.
+          3. Commit and push immediately.
+          4. Do NOT perform extra searches or lists." --approval-mode=yolo --max-turns=2
