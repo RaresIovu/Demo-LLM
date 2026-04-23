@@ -38,14 +38,10 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Use npx to avoid installation overhead
-          # Added --max-turns=2 to prevent the AI from looping and hitting quotas
-          npx @google/gemini-cli "I need to fix an issue. 
-          Title: ${{ github.event.issue.title }}
-          Body: ${{ github.event.issue.body }}
+          npx @google/gemini-cli "CONTEXT: You are a GitHub automation bot.
+          ISSUE: ${{ github.event.issue.title }}
           
-          STRICT RULES:
-          1. Create a new branch.
-          2. Create/modify the necessary files.
-          3. Commit and push immediately.
-          4. Do NOT perform extra searches or lists." --approval-mode=yolo --max-turns=2
+          GOAL: Create a new branch, add the requested changes, and push. 
+          DO NOT use 'search' or 'list' tools. 
+          DO NOT ask for clarification.
+          COMMANDS: Run only the git commands and file edits necessary to finish in one turn." --approval-mode=yolo
