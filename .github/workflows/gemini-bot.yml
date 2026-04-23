@@ -1,0 +1,50 @@
+name: Gemini AI Developer
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  gemini-job:
+    # SECURITY: Only triggers if the comment starts with the command 
+    # AND the user is the Repo Owner or a Collaborator.
+    if: |
+      contains(github.event.comment.body, '@gemini /fix') && 
+      (github.event.comment.author_association == 'OWNER' || 
+       github.event.comment.author_association == 'COLLABORATOR')
+    
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetches all history so the AI can see the code
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Gemini CLI
+        run: npm install -g @google/gemini-cli
+
+      - name: Execute AI Fix
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Configure the CLI with your key
+          gemini config set api_key "$GEMINI_API_KEY"
+          
+          # The "Magic" Command:
+          # Tells Gemini to read the issue, fix the code, and push a new branch.
+          gemini "Issue Title: ${{ github.event.issue.title }}
+          Issue Body: ${{ github.event.issue.body }}
+          
+          Task: Analyze the current code in this repo and create a new git branch 
+          with a fix for this issue. Commit the changes and push the branch to origin." --approval-mode=yolo
