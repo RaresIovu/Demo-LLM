@@ -37,6 +37,7 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_CLI_TRUST_WORKSPACE: true
         run: |
           npx @google/gemini-cli "CONTEXT: You are a GitHub automation bot.
           ISSUE: ${{ github.event.issue.title }}
