@@ -14,6 +14,10 @@
         Apasa butonul pentru a trimite o cerere <strong>GET</strong> catre
         <code>/produse</code> si a vedea toate produsele din baza de date.
     </p>
+    <p style="color:#555; margin-bottom:1rem;">
+        Foloseste butonul <strong>Actualizeaza Pret</strong> din tabel pentru a trimite o cerere <strong>PATCH</strong> catre
+        <code>/produs/&lt;id&gt;/pret</code>.
+    </p>
     <button class="btn-primar" onclick="incarcaProduse()">Incarca produse</button>
 
     <div id="mesaj" class="mesaj"></div>
@@ -26,6 +30,7 @@
                     <th>ID</th>
                     <th>Nume</th>
                     <th>Pret (RON)</th>
+                    <th>Actiuni</th>
                 </tr>
             </thead>
             <tbody id="corp-tabel"></tbody>
@@ -34,6 +39,40 @@
 </div>
 
 <script>
+async function actualizeazaPret(id, pretActual) {
+    const noulPretStr = prompt(`Introdu noul pret pentru produsul cu ID ${id}:`, pretActual);
+    if (noulPretStr === null || noulPretStr === "") return;
+
+    const noulPret = parseFloat(noulPretStr);
+    if (isNaN(noulPret)) {
+        alert("Te rugam sa introduci un numar valid.");
+        return;
+    }
+
+    try {
+        const raspuns = await fetch(`/produs/${id}/pret`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ price: noulPret })
+        });
+
+        const date = await raspuns.json();
+
+        if (!raspuns.ok) {
+            afiseazaMesaj('eroare', date.eroare || 'Eroare la actualizarea pretului.');
+            return;
+        }
+
+        afiseazaMesaj('succes', `Pretul produsului "${date.name}" a fost actualizat la ${date.price} RON.`);
+        incarcaProduse(); // Refresh list
+
+    } catch (err) {
+        afiseazaMesaj('eroare', 'Nu s-a putut conecta la server.');
+    }
+}
+
 async function incarcaProduse() {
     const mesajEl        = document.getElementById('mesaj');
     const containerTabel = document.getElementById('container-tabel');
@@ -68,6 +107,9 @@ async function incarcaProduse() {
                 <td>${produs.id}</td>
                 <td>${produs.name}</td>
                 <td>${produs.price}</td>
+                <td>
+                    <button class="btn-secundar" onclick="actualizeazaPret(${produs.id}, ${produs.price})">Actualizeaza Pret</button>
+                </td>
             `;
             corpTabel.appendChild(rand);
         });

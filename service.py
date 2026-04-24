@@ -57,3 +57,18 @@ def add_knowledge(name, price):
         }
         return item #Se returneaza obiectul adaugat, pentru confirmare, integritate a datelor, pentru ca clientul sa primeasca id-ul, etc
 
+def update_product_price(produs_id, new_price):
+    with get_connection() as con:
+        cur = con.cursor()
+        cur.execute("SELECT 1 FROM products WHERE id = ?", (produs_id,))
+        if not cur.fetchone():
+            return None
+        
+        cur.execute("UPDATE products SET price = ? WHERE id = ? RETURNING id, name, price", (new_price, produs_id))
+        row = cur.fetchone()
+        return {
+            "id": row[0],
+            "name": row[1],
+            "price": row[2]
+        }
+
