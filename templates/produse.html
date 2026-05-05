@@ -30,6 +30,7 @@
                     <th>ID</th>
                     <th>Nume</th>
                     <th>Pret (RON)</th>
+                    <th></th>
                     <th>Actiuni</th>
                 </tr>
             </thead>
@@ -40,12 +41,10 @@
 
 <script>
 async function actualizeazaPret(id, pretActual) {
-    const noulPretStr = prompt(`Introdu noul pret pentru produsul cu ID ${id}:`, pretActual);
-    if (noulPretStr === null || noulPretStr === "") return;
-
-    const noulPret = parseFloat(noulPretStr);
+    const input = document.getElementById(`input-pret-${id}`);
+    const noulPret = parseFloat(input.value);
     if (isNaN(noulPret)) {
-        alert("Te rugam sa introduci un numar valid.");
+        afiseazaMesaj('eroare', 'Te rugam sa introduci un numar');
         return;
     }
 
@@ -58,15 +57,15 @@ async function actualizeazaPret(id, pretActual) {
             body: JSON.stringify({ price: noulPret })
         });
 
-        const date = await raspuns.json();
+        const res = await raspuns.json();
 
         if (!raspuns.ok) {
-            afiseazaMesaj('eroare', date.eroare || 'Eroare la actualizarea pretului.');
+            afiseazaMesaj('eroare', res.eroare || 'Eroare la actualizarea pretului.');
             return;
         }
 
-        afiseazaMesaj('succes', `Pretul produsului "${date.name}" a fost actualizat la ${date.price} RON.`);
-        incarcaProduse(); // Refresh list
+        await incarcaProduse(); // Refresh list
+        afiseazaMesaj('succes', `Pretul produsului "${res.date.name}" a fost actualizat la ${res.date.price} RON.`);
 
     } catch (err) {
         afiseazaMesaj('eroare', 'Nu s-a putut conecta la server.');
@@ -107,6 +106,9 @@ async function incarcaProduse() {
                 <td>${produs.id}</td>
                 <td>${produs.name}</td>
                 <td>${produs.price}</td>
+                <td>
+                    <input type="number" id="input-pret-${produs.id}" placeholder="Ex: 1050" style="width: 120px;">
+                </td>
                 <td>
                     <button class="btn-secundar" onclick="actualizeazaPret(${produs.id}, ${produs.price})">Actualizeaza Pret</button>
                 </td>

@@ -7,11 +7,9 @@ update_bp = Blueprint('update_produse', __name__)
 @update_bp.route('/produs/<int:produs_id>/pret', methods=['PATCH'])
 def update_pret(produs_id):
     try:
-        data = request.get_json()
-        if not data or 'price' not in data:
-            return jsonify({"eroare": "Campul 'price' lipseste", "status": 400}), 400
+        data = request.get_json() or {}
         
-        new_price = data['price']
+        new_price = data.get('price')
         
         # Validare pret
         err, status = validate_price(new_price)
@@ -22,6 +20,9 @@ def update_pret(produs_id):
         if not updated_produs:
             return jsonify({"eroare": "Produsul nu a fost gasit", "status": 404}), 404
             
-        return jsonify(updated_produs)
+        return jsonify({
+            "mesaj": "Produsul a fost adaugat",
+            "date": updated_produs}), 201
+    
     except Exception as e:
         return jsonify({"eroare": str(e), "status": 500}), 500
