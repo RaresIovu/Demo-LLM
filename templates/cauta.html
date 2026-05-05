@@ -47,6 +47,10 @@
                 </tr>
             </tbody>
         </table>
+        <div id="cat-section" style="margin-top: 1.2rem; padding: 0.8rem; background: #f8f9fa; border-radius: 4px; border-left: 4px solid #007bff;">
+            <strong>Categorii:</strong>
+            <div id="rez-categories" style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;"></div>
+        </div>
     </div>
 </div>
 
@@ -85,6 +89,22 @@ async function cautaProdus() {
         document.getElementById('rez-id').textContent    = date.id;
         document.getElementById('rez-name').textContent  = date.name;
         document.getElementById('rez-price').textContent = date.price;
+
+        const catContainer = document.getElementById('rez-categories');
+        catContainer.innerHTML = '';
+        if (date.categories && date.categories.length > 0) {
+            date.categories.forEach(cat => {
+                const badge = document.createElement('div');
+                badge.textContent = cat;
+                badge.style.background = '#e9ecef';
+                badge.style.padding = '4px 8px';
+                badge.style.borderRadius = '4px';
+                badge.style.fontSize = '0.9rem';
+                catContainer.appendChild(badge);
+            });
+        } else {
+            catContainer.textContent = 'Fara categorii';
+        }
 
         rezultat.style.display = 'block';
         afiseazaMesaj('succes', 'Produs gasit cu succes.');

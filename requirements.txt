@@ -1,2 +1,4 @@
 flask
 pytest
+sentence-transformers
+torch
