@@ -1,17 +1,11 @@
 name: Gemini AI Developer
 on:
-  issue_comment:
-    types: [created]
+  push:
+    paths:
+      - 'todo/*.md'
 
 jobs:
   gemini-job:
-    # SECURITY: Only triggers if the comment starts with the command 
-    # AND the user is the Repo Owner or a Collaborator.
-    if: |
-      contains(github.event.comment.body, '@gemini /fix') && 
-      (github.event.comment.author_association == 'OWNER' || 
-       github.event.comment.author_association == 'COLLABORATOR')
-    
     runs-on: ubuntu-latest
     
     permissions:
@@ -23,7 +17,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetches all history so the AI can see the code
+          fetch-depth: 0 
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -39,10 +33,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_CLI_TRUST_WORKSPACE: true
         run: |
+          # Read the specific task file
+          PROMPT_CONTENT=$(cat todo/current_task.md)
+          
           npx @google/gemini-cli "CONTEXT: You are a GitHub automation bot.
-          ISSUE: ${{ github.event.issue.title }}
+          TASK DETAILS FROM FILE: $PROMPT_CONTENT
           
           GOAL: Create a new branch, add the requested changes, and push. 
-          DO NOT use 'search' or 'list' tools. 
-          DO NOT ask for clarification.
           COMMANDS: Run only the git commands and file edits necessary to finish in one turn." --approval-mode=yolo
