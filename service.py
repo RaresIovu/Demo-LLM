@@ -57,3 +57,27 @@ def add_knowledge(name, price):
         }
         return item #Se returneaza obiectul adaugat, pentru confirmare, integritate a datelor, pentru ca clientul sa primeasca id-ul, etc
 
+def update_product_price(produs_id, new_price):
+    with get_connection() as con:
+        cur = con.cursor()
+        cur.execute("SELECT id, name, price FROM products WHERE id = ?", (produs_id,))
+        product = cur.fetchone()
+        
+        if not product:
+            return None
+            
+        current_price = product[2]
+        
+        # 2. Comparison Logic
+        if float(new_price) == float(current_price):
+            # You can raise a generic Exception or a custom one
+            raise Exception(f"Noul pret ({new_price}) este identic cu pretul actual.")
+        
+        cur.execute("UPDATE products SET price = ? WHERE id = ? RETURNING id, name, price", (new_price, produs_id))
+        row = cur.fetchone()
+        return {
+            "id": row[0],
+            "name": row[1],
+            "price": row[2]
+        }
+
