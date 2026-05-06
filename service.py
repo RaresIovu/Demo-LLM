@@ -113,9 +113,7 @@ def update_product_price(produs_id, new_price):
             
         current_price = product[2]
         
-        # 2. Comparison Logic
         if float(new_price) == float(current_price):
-            # You can raise a generic Exception or a custom one
             raise Exception(f"Noul pret ({new_price}) este identic cu pretul actual.")
         
         cur.execute("UPDATE products SET price = ? WHERE id = ? RETURNING id, name, price", (new_price, produs_id))
