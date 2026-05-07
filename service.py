@@ -61,11 +61,9 @@ def add_knowledge(name, price):
         if cur.fetchone():
             raise Exception("Product already exists") #Se ridica o exceptie, efectiv se returneaza si se instantiaza un obiect
         
-        # 1. Generate embedding for the product
         embedding = get_embedding(name)
         embedding_json = json.dumps(embedding)
 
-        # 2. Insert product with embedding
         cur.execute("INSERT INTO products (name, price, embedding) VALUES (?, ?, ?) RETURNING id, name, price", (name, price, embedding_json))
         row = cur.fetchone()
         product_id = row[0]
@@ -77,8 +75,6 @@ def add_knowledge(name, price):
             "categories": []
         }
 
-        # 3. Categorization logic
-        # Get all categories
         cur.execute("SELECT id, name, embedding FROM categories")
         categories_rows = cur.fetchall()
         categories = [{"id": r[0], "name": r[1], "embedding": r[2]} for r in categories_rows]
@@ -86,11 +82,9 @@ def add_knowledge(name, price):
         if categories:
             top_category_ids = get_top_category_ids(name, categories, top_k=3)
             
-            # 4. Assign categories in junction table
             for cat_id in top_category_ids:
                 cur.execute("INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)", (product_id, cat_id))
             
-            # Update item with assigned category names
             cur.execute("""
                 SELECT c.name FROM categories c
                 JOIN product_categories pc ON c.id = pc.category_id
