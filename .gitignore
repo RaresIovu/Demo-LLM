@@ -3,3 +3,4 @@ venv/
 postman/
 __pycache__/
 .pyc
+.db
