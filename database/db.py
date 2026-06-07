@@ -13,6 +13,7 @@ def get_connection(auto_create = False):
             return
         
         con = sqlite3.connect(DB_PATH)
+        con.row_factory = sqlite3.Row
         yield con
         con.commit()
     except Exception as e:

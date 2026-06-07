@@ -14,9 +14,9 @@ def get_allKnowledge():
         content = []
         for row in rows:
             content.append({
-                "id": row[0],
-                "name":row[1],
-                "price":row[2]
+                "id": row["id"],
+                "name":row["name"],
+                "price":row["price"]
             }) # Se adauga cate un obiect de tip produs
 
         return content
@@ -27,15 +27,15 @@ def get_knowledge(id):
         cur = con.cursor()
         cur.execute(
         "SELECT id, name, price FROM products WHERE id = ?", (id,)) #se selecteaza fiecare produs din products unde id-ul este cel transmit prin parametru
-         #Metoda accepta ca parametru doar tuple, "," transforma parametrul in unul
+        #Metoda accepta ca parametru doar tuple, "," transforma parametrul in unul
         row = cur.fetchone() # Se transmite un singur obiect din cursor catre variabila row(un singur produs)
         if not row:
             return None
 
         data = {
-            "id":row[0],
-            "name":row[1],
-            "price":row[2],
+            "id":row["id"],
+            "name":row["name"],
+            "price":row["price"],
             "categories": []
         }
 
@@ -46,12 +46,13 @@ def get_knowledge(id):
             WHERE pc.product_id = ?
         """, (id,))
         cat_rows = cur.fetchall()
-        data["categories"] = [r[0] for r in cat_rows]
+        data["categories"] = [r["c.name"] for r in cat_rows]
 
         return data
 
 def add_knowledge(name, price):
     with get_connection() as con:
+        cur = con.cursor()
         cur = con.cursor()
         cur.execute(
         "SELECT 1 FROM products WHERE LOWER(name) = LOWER(?)",
@@ -66,18 +67,17 @@ def add_knowledge(name, price):
 
         cur.execute("INSERT INTO products (name, price, embedding) VALUES (?, ?, ?) RETURNING id, name, price", (name, price, embedding_json))
         row = cur.fetchone()
-        product_id = row[0]
+        product_id = row["id"]
         
         item = {
-            "id": row[0],
-            "name": row[1],
-            "price": row[2],
+            "id": product_id,
+            "name": row["name"],
+            "price": row["price"],
             "categories": []
         }
-
         cur.execute("SELECT id, name, embedding FROM categories")
         categories_rows = cur.fetchall()
-        categories = [{"id": r[0], "name": r[1], "embedding": r[2]} for r in categories_rows]
+        categories = [{"id": r["id"], "name": r["name"], "embedding": r["embedding"]} for r in categories_rows]
 
         if categories:
             top_category_ids = get_top_category_ids(name, categories, top_k=3)
@@ -91,7 +91,7 @@ def add_knowledge(name, price):
                 WHERE pc.product_id = ?
             """, (product_id,))
             cat_rows = cur.fetchall()
-            item["categories"] = [r[0] for r in cat_rows]
+            item["categories"] = [r["c.name"]for r in cat_rows]
 
         return item #Se returneaza obiectul adaugat, pentru confirmare, integritate a datelor, pentru ca clientul sa primeasca id-ul, etc
 
@@ -105,7 +105,7 @@ def update_product_price(produs_id, new_price):
         if not product:
             return None
             
-        current_price = product[2]
+        current_price = product["price"]
         
         if float(new_price) == float(current_price):
             raise Exception(f"Noul pret ({new_price}) este identic cu pretul actual.")
@@ -113,8 +113,8 @@ def update_product_price(produs_id, new_price):
         cur.execute("UPDATE products SET price = ? WHERE id = ? RETURNING id, name, price", (new_price, produs_id))
         row = cur.fetchone()
         return {
-            "id": row[0],
-            "name": row[1],
-            "price": row[2]
+            "id": row["id"],
+            "name": row["name"],
+            "price": row["price"]
         }
 
